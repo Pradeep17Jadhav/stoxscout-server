@@ -1,5 +1,4 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
 
 const stocks = [
     {name: 'Adani Ports and SEZ', nse: 'ADANIPORTS', bse: '541387'},

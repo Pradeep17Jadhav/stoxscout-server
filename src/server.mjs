@@ -18,7 +18,7 @@ app.use(bodyParser.json());
 const PORT = process.env.PORT || 4000;
 
 mongoose
-    .connect(process.env.MONGODB_URI, {useNewUrlParser: true})
+    .connect(process.env.MONGODB_URI)
     .then(() => console.log('MongoDB connected'))
     .catch((err) => console.log(err));
 

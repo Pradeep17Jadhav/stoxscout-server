@@ -7,7 +7,7 @@ import {signupValidation} from './validators/signupValidation.mjs';
 import {authenticateToken} from './middlewares/authMiddleware.mjs';
 import {getIndicesData, setIndicesData} from './controllers/indicesController.mjs';
 import {getMarketData, setMarketData} from './controllers/marketDataController.mjs';
-import {getHoldings, getUserHoldingsList, addHolding} from './controllers/userHoldingsController.mjs';
+import {getHoldings, getUserHoldingsList, addHolding, uploadHoldings} from './controllers/userHoldingsController.mjs';
 import {login, logout, register} from './controllers/authController.mjs';
 dotenv.config();
 
@@ -26,6 +26,7 @@ app.get('/userHoldingsList', authenticateToken, getUserHoldingsList);
 
 app.get('/api/holdings', authenticateToken, getHoldings);
 app.post('/api/holdings', authenticateToken, addHolding);
+app.post('/api/upload', authenticateToken, uploadHoldings);
 
 app.post('/api/indices', setIndicesData);
 app.get('/api/indices', authenticateToken, getIndicesData);

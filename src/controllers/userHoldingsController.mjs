@@ -14,7 +14,15 @@ const getHoldings = async (req, res) => {
         if (holdingsData.length === 0) {
             return res.status(200).json([]);
         }
-        res.json(holdingsData);
+        const convertedHoldingsData = holdingsData.map((holding) => ({
+            ...holding,
+            transactions: holding.transactions.map((transaction) => ({
+                ...transaction,
+                dateAdded: new Date(transaction.dateAdded).getTime()
+            }))
+        }));
+
+        res.json(convertedHoldingsData);
     } catch (error) {
         console.error(error);
         res.status(500).json({message: 'Server error while fetching holdings', error});

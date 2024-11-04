@@ -1,7 +1,4 @@
-import fs from 'fs';
 import Holding from '../models/holding.mjs';
-
-const scriptListPath = '../../data/common/scriptList.json';
 
 const getHoldings = async (req, res) => {
     try {
@@ -31,11 +28,16 @@ const getHoldings = async (req, res) => {
 
 const getUserHoldingsList = async (req, res) => {
     try {
-        const holdingsData = await Holding.find({userId: req.user});
-        if (!holdingsData || holdingsData.length === 0) {
+        const holdingsData = await Holding.distinct('symbol');
+        if (!holdingsData) {
             return res.status(404).json({message: 'No holdings found for this user.'});
         }
-        const holdingsList = await getHoldingsList(holdingsData);
+        if (holdingsData.length === 0) {
+            return res.status(200).json([]);
+        }
+        const holdingsList = {
+            nse: holdingsData
+        };
         res.json(holdingsList);
     } catch (error) {
         res.status(500).json(error);
@@ -112,49 +114,6 @@ const uploadHoldings = async (req, res) => {
         console.error(err);
         res.status(500).send(`Server error while uploading holdings, ${err}`);
     }
-};
-
-const getHoldingsListByExchange = (holdings, exchange) =>
-    holdings
-        .filter((holding) => holding.transactions.some((transaction) => transaction.exchange === exchange))
-        .map((holding) => holding.symbol);
-
-const getHoldingsList = async (holdings) => {
-    const nseList = getHoldingsListByExchange(holdings, 'NSE');
-    const bseList = getHoldingsListByExchange(holdings, 'BSE');
-    return {
-        nse: nseList,
-        bse: await convertBseListToCodes(bseList)
-    };
-};
-
-const convertBseListToCodes = async (bseList) => {
-    const scriptListData = await readScriptList();
-    return scriptListData
-        .map((script) => {
-            if (bseList.some((bseListItem) => bseListItem === script.nse)) {
-                return script.bse !== 'N/A' ? script.bse : null;
-            }
-        })
-        .filter((bseCode) => !!bseCode);
-};
-
-const readScriptList = async () => readFile(scriptListPath);
-
-const readFile = (filePath) => {
-    return new Promise((resolve, reject) => {
-        fs.readFile(filePath, 'utf8', (err, data) => {
-            if (err) {
-                return reject({error: 'Error reading file'});
-            }
-            try {
-                const res = JSON.parse(data);
-                resolve(res);
-            } catch (parseErr) {
-                reject({error: 'Error parsing JSON'});
-            }
-        });
-    });
 };
 
 export {getHoldings, getUserHoldingsList, addHolding, uploadHoldings};

@@ -22,7 +22,7 @@ mongoose
     .then(() => console.log('MongoDB connected'))
     .catch((err) => console.log(err));
 
-app.get('/userHoldingsList', authenticateToken, getUserHoldingsList);
+app.get('/userHoldingsList', getUserHoldingsList);
 
 app.get('/api/holdings', authenticateToken, getHoldings);
 app.post('/api/holdings', authenticateToken, addHolding);

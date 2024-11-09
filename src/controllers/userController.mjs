@@ -7,7 +7,7 @@ const getPreferences = async (req, res) => {
             ?.lean()
             .select('-_id -__v -createdAt -updatedAt -userId');
         if (!preferences) {
-            return res.status(200).json([]);
+            return res.status(200).json({});
         }
         res.status(200).json(preferences);
     } catch (err) {

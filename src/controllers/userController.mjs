@@ -1,4 +1,21 @@
 import Preference from '../models/preference.mjs';
+import User from '../models/user.mjs';
+
+const getUser = async (req, res) => {
+    const username = req.user;
+    try {
+        const user = await User.findOne({username});
+        if (!user) {
+            return res.status(404).json({error: true, type: 'user_not_found'});
+        }
+        res.status(200).json({
+            name: user.name
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({error: true, type: 'server_error'});
+    }
+};
 
 const getPreferences = async (req, res) => {
     const userId = req.user;
@@ -52,4 +69,4 @@ const updatePreferences = async (req, res) => {
     }
 };
 
-export {getPreferences, updatePreferences};
+export {getUser, getPreferences, updatePreferences};

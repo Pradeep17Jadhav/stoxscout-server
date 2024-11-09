@@ -29,11 +29,8 @@ const getHoldings = async (req, res) => {
 const getUserHoldingsList = async (req, res) => {
     try {
         const holdingsData = await Holding.distinct('symbol');
-        if (!holdingsData) {
-            return res.status(404).json({message: 'No holdings found for this user.'});
-        }
-        if (holdingsData.length === 0) {
-            return res.status(200).json([]);
+        if (!holdingsData || holdingsData.length === 0) {
+            return res.status(200).json({nse: []});
         }
         const holdingsList = {
             nse: holdingsData

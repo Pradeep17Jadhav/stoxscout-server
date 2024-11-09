@@ -7,7 +7,8 @@ import {signupValidation} from './validators/signupValidation.mjs';
 import {authenticateToken} from './middlewares/authMiddleware.mjs';
 import {getIndicesData, setIndicesData} from './controllers/indicesController.mjs';
 import {getMarketData, setMarketData} from './controllers/marketDataController.mjs';
-import {getHoldings, getUserHoldingsList, addHolding, uploadHoldings} from './controllers/userHoldingsController.mjs';
+import {getHoldings, getUserHoldingsList, addHolding, uploadHoldings} from './controllers/holdingsController.mjs';
+import {getPreferences, updatePreferences} from './controllers/userController.mjs';
 import {login, logout, register} from './controllers/authController.mjs';
 dotenv.config();
 
@@ -36,7 +37,10 @@ app.post('/api/market', setMarketData);
 
 app.post('/api/register', signupValidation, register);
 app.post('/api/login', login);
-app.post('/api/logout', authenticateToken, logout);
+app.post('/api/logout', logout);
+
+app.get('/api/preference', authenticateToken, getPreferences);
+app.put('/api/preference', authenticateToken, updatePreferences);
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);

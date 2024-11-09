@@ -19,7 +19,7 @@ const authenticateToken = (req, res, next) => {
             if (err.name === 'TokenExpiredError') {
                 return res.status(401).json({error: true, type: 'token_expired'});
             }
-            return res.status(403).json({error: true, type: 'invalid_token'});
+            return res.status(401).json({error: true, type: 'invalid_token'});
         }
         req.user = user.username;
         next();

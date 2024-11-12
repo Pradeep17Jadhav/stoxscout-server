@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import User from '../models/user.mjs';
 import {blacklistToken} from '../middlewares/authMiddleware.mjs';
+import Session from '../models/session.mjs';
 
 const register = async (req, res) => {
     const {username, password, email, name} = req.body;
@@ -31,6 +32,7 @@ const register = async (req, res) => {
         const newUser = new User({username, password: hashedPassword, email, name});
         await newUser.save();
         const token = jwt.sign({username}, process.env.JWT_SECRET, {expiresIn: '1d'});
+        await Session.findOneAndUpdate({username}, {lastActivity: Date.now()}, {upsert: true, new: true});
         res.status(201).json({token, success: true});
     } catch (err) {
         if (err.code === 11000) {
@@ -46,6 +48,7 @@ const login = async (req, res) => {
         const user = await User.findOne({username});
         if (user && (await bcrypt.compare(password, user.password))) {
             const token = jwt.sign({username: user.username}, process.env.JWT_SECRET, {expiresIn: '1d'});
+            await Session.findOneAndUpdate({username}, {lastActivity: Date.now()}, {upsert: true, new: true});
             res.status(200).json({token});
         } else {
             return res.status(401).json({error: true, type: 'invalid_credentials'});

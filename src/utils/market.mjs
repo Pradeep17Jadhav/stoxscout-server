@@ -1,18 +1,19 @@
 import axios from 'axios';
 import Holding from '../models/holding.mjs';
+import logger from '../utils/logger.mjs';
 import {setMarketDataInternally} from '../controllers/marketDataController.mjs';
 import {getAccessHeaders} from '../controllers/accessController.mjs';
 
 const fetchAndSaveMarketData = async (holdingsList, accessHeader) => {
-    console.log(Date.now());
+    logger.info(Date.now());
 
     try {
         // const fetchDataPromises = holdingsList.map((symbol) => {
         //     const api = `${process.env.MARKET_FETCHER_API}=${symbol}`;
         //     console.log('api', api, accessHeader);
         const api = `${process.env.MARKET_FETCHER_API}=HDFCBANK`;
-        console.log('api', api);
-        console.log('accessHeader', accessHeader);
+        logger.info('api', api);
+        logger.info('accessHeader', accessHeader);
         const res = await axios.get(api, {
             headers: {
                 'User-Agent':
@@ -24,8 +25,8 @@ const fetchAndSaveMarketData = async (holdingsList, accessHeader) => {
             }
         });
         // });
-        console.log('res', res);
-        console.log('res', formatPriceInfo(res.data));
+        logger.info('res', res);
+        logger.info('res', formatPriceInfo(res.data));
         // const results = await Promise.all(fetchDataPromises);
         // console.log('results.length', results.length);
         // const userHoldingsData = results.map((stockResponse) => {
@@ -40,7 +41,7 @@ const fetchAndSaveMarketData = async (holdingsList, accessHeader) => {
         //     return false;
         // }
     } catch (e) {
-        console.error('Error: Could not save market data');
+        logger.error('Error: Could not save market data');
         return false;
     }
 };

@@ -10,7 +10,9 @@ import {getIndicesData, setIndicesData} from './controllers/indicesController.mj
 import {getMarketData, setMarketData} from './controllers/marketDataController.mjs';
 import {getHoldings, getUserHoldingsList, addHolding, uploadHoldings} from './controllers/holdingsController.mjs';
 import {getPreferences, updatePreferences, getUser} from './controllers/userController.mjs';
+import {updateAccessHeader} from './controllers/accessAdminController.mjs';
 import {login, logout, register} from './controllers/authController.mjs';
+import {loadMarketData} from './utils/market.mjs';
 import './cron/sessionCleanup.mjs';
 dotenv.config();
 
@@ -22,7 +24,10 @@ const PORT = process.env.PORT || 4000;
 
 mongoose
     .connect(process.env.MONGODB_URI)
-    .then(() => console.log('MongoDB connected'))
+    .then(() => {
+        console.log('MongoDB connected');
+        loadMarketData();
+    })
     .catch((err) => console.log(err));
 
 app.get('/userHoldingsList', getUserHoldingsList);
@@ -45,6 +50,7 @@ app.get('/api/preference', authenticateToken, validateSession, getPreferences);
 app.put('/api/preference', authenticateToken, validateSession, updatePreferences);
 
 app.get('/api/user', authenticateToken, validateSession, getUser);
+app.put('/api/access', authenticateToken, updateAccessHeader);
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);

@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const stockSchema = new mongoose.Schema({
+const StockSchema = new mongoose.Schema({
     symbol: {
         type: String,
         required: true,
@@ -37,6 +37,6 @@ const stockSchema = new mongoose.Schema({
     }
 });
 
-const Stock = mongoose.model('Stock', stockSchema);
+const Stock = mongoose.model('Stock', StockSchema);
 
 export default Stock;

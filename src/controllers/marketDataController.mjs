@@ -30,6 +30,35 @@ const setMarketData = async (req, res) => {
     }
 };
 
+const setMarketDataInternally = async (marketData) => {
+    try {
+        await Promise.all(
+            marketData.map(async (data) => {
+                await MarketData.updateOne(
+                    {symbol: data.symbol},
+                    {
+                        $set: {
+                            lastPrice: data.lastPrice,
+                            change: data.change,
+                            pChange: data.pChange,
+                            previousClose: data.previousClose,
+                            open: data.open,
+                            close: data.close,
+                            basePrice: data.basePrice,
+                            updatedAt: Date.now()
+                        },
+                        $setOnInsert: {createdAt: Date.now()}
+                    },
+                    {upsert: true}
+                );
+            })
+        );
+        return true;
+    } catch (err) {
+        return false;
+    }
+};
+
 const getMarketData = async (req, res) => {
     try {
         const marketData = await MarketData.find({}).lean().select('-_id -__v -createdAt -updatedAt');
@@ -39,4 +68,4 @@ const getMarketData = async (req, res) => {
     }
 };
 
-export {setMarketData, getMarketData};
+export {setMarketDataInternally, setMarketData, getMarketData};

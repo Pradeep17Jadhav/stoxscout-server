@@ -9,6 +9,7 @@ const fetchAndSaveMarketData = async (holdingsList, accessHeader) => {
     try {
         const fetchDataPromises = holdingsList.map((symbol) => {
             const api = `${process.env.MARKET_FETCHER_API}=${symbol}`;
+            console.log('api', api, accessHeader);
             return axios.get(api, {
                 headers: {
                     'User-Agent':

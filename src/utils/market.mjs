@@ -41,7 +41,9 @@ const loadMarketData = () => {
     let fetchCount = 0;
     let holdingsList = [];
     let accessHeader = null;
+    console.log('interval set');
     setInterval(async () => {
+        console.log('interval executed');
         try {
             if (!holdingsList.length) {
                 holdingsList = await Holding.distinct('symbol');

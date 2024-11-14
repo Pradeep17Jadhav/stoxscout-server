@@ -17,7 +17,9 @@ const fetchAndSaveMarketData = async (holdingsList, accessHeader) => {
                 }
             });
         });
+        console.log('fetching');
         const results = await Promise.all(fetchDataPromises);
+        console.log('results.length', results.length);
         const userHoldingsData = results.map((stockResponse) => {
             return formatPriceInfo(stockResponse.data);
         });
@@ -30,7 +32,7 @@ const fetchAndSaveMarketData = async (holdingsList, accessHeader) => {
             return false;
         }
     } catch (e) {
-        console.error('Error: Could not save market data');
+        console.error('Error: Could not save market data', e);
         return false;
     }
 };

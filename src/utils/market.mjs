@@ -7,33 +7,37 @@ const fetchAndSaveMarketData = async (holdingsList, accessHeader) => {
     console.log(Date.now());
 
     try {
-        const fetchDataPromises = holdingsList.map((symbol) => {
-            const api = `${process.env.MARKET_FETCHER_API}=${symbol}`;
-            console.log('api', api, accessHeader);
-            return axios.get(api, {
-                headers: {
-                    'User-Agent':
-                        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-                    ...accessHeader
-                }
-            });
+        // const fetchDataPromises = holdingsList.map((symbol) => {
+        //     const api = `${process.env.MARKET_FETCHER_API}=${symbol}`;
+        //     console.log('api', api, accessHeader);
+        const api = `${process.env.MARKET_FETCHER_API}=HDFCBANK`;
+        console.log('api', api);
+        console.log('accessHeader', accessHeader);
+        const res = await axios.get(api, {
+            headers: {
+                'User-Agent':
+                    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                ...accessHeader
+            }
         });
-        console.log('fetching');
-        const results = await Promise.all(fetchDataPromises);
-        console.log('results.length', results.length);
-        const userHoldingsData = results.map((stockResponse) => {
-            return formatPriceInfo(stockResponse.data);
-        });
-        const saveResult = await setMarketDataInternally(userHoldingsData);
-        if (saveResult) {
-            console.log('Market data successfully saved');
-            return true;
-        } else {
-            console.error('Could not save market data');
-            return false;
-        }
+        // });
+        console.log('res', res);
+        console.log('res', formatPriceInfo(res.data));
+        // const results = await Promise.all(fetchDataPromises);
+        // console.log('results.length', results.length);
+        // const userHoldingsData = results.map((stockResponse) => {
+        //     return formatPriceInfo(stockResponse.data);
+        // });
+        // const saveResult = await setMarketDataInternally(userHoldingsData);
+        // if (saveResult) {
+        //     console.log('Market data successfully saved');
+        //     return true;
+        // } else {
+        //     console.error('Could not save market data');
+        //     return false;
+        // }
     } catch (e) {
-        console.error('Error: Could not save market data', e);
+        console.error('Error: Could not save market data');
         return false;
     }
 };
@@ -73,7 +77,7 @@ const loadMarketData = () => {
             holdingsList = [];
             fetchCount = 0;
         }
-    }, 60000);
+    }, 20000);
 };
 
 const formatPriceInfo = (apiResponse) => {

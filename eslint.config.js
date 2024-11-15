@@ -14,7 +14,7 @@ export default [
             quotes: ['error', 'single'],
             semi: ['error', 'always'],
             'no-console': 'warn',
-            'no-unused-vars': 'warn',
+            'no-unused-vars': 'error',
             'no-debugger': 'warn',
             '@typescript-eslint/no-unused-vars': 'error', // TypeScript-specific rule
             '@typescript-eslint/explicit-module-boundary-types': 'off', // Optional: Disable explicit return types for functions

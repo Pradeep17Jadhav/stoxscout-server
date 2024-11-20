@@ -1,6 +1,6 @@
 import {NextFunction, Request, Response} from 'express';
 import jwt from 'jsonwebtoken';
-import ErrorCodes from '../types/errors';
+import ErrorCodes from '../types/errors.js';
 
 const blacklistedTokens: string[] = [];
 

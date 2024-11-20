@@ -3,13 +3,13 @@ import {validationResult} from 'express-validator';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import {MongoError} from 'mongodb';
-import User from '../models/user';
-import {blacklistToken} from '../middlewares/authMiddleware';
+import User from '../models/user.js';
+import {blacklistToken} from '../middlewares/authMiddleware.js';
 import Session from '../models/session.js';
-import {TypedRequest} from '../types/express';
-import {RegisterRequestBody} from '../types/requestBodies';
-import logger from '../utils/logger';
-import ErrorCodes from '../types/errors';
+import {TypedRequest} from '../types/express.js';
+import {RegisterRequestBody} from '../types/requestBodies.js';
+import logger from '../utils/logger.js';
+import ErrorCodes from '../types/errors.js';
 
 const register = async (req: TypedRequest<RegisterRequestBody>, res: Response) => {
     const {username, password, email, name} = req.body;

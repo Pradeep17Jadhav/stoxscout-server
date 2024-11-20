@@ -1,8 +1,8 @@
 import {Request, Response} from 'express';
-import MarketData from '../models/marketData';
-import {TypedRequest} from '../types/express';
-import {MarketItem} from '../types/marketTypes';
-import {SetMarketDataRequestBody} from '../types/requestBodies';
+import MarketData from '../models/marketData.js';
+import {TypedRequest} from '../types/express.js';
+import {MarketItem} from '../types/marketTypes.js';
+import {SetMarketDataRequestBody} from '../types/requestBodies.js';
 
 const setMarketData = async (req: TypedRequest<SetMarketDataRequestBody>, res: Response) => {
     const newMarketData = req.body;

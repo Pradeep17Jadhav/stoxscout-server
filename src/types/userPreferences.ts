@@ -1,4 +1,4 @@
-import {DEFAULT_COLUMNS, SORT_ORDER} from './common';
+import {DEFAULT_COLUMNS, SORT_ORDER} from './common.js';
 
 export type DashboardPreferences = {
     visibleColumns?: DEFAULT_COLUMNS[];

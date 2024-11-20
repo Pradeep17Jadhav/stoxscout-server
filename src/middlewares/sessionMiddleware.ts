@@ -1,8 +1,8 @@
 import {Request, Response, NextFunction} from 'express';
 import jwt, {JwtPayload} from 'jsonwebtoken';
-import Session from '../models/session';
-import ErrorCodes from '../types/errors';
-import logger from '../utils/logger';
+import Session from '../models/session.js';
+import ErrorCodes from '../types/errors.js';
+import logger from '../utils/logger.js';
 
 const validateSession = async (req: Request, res: Response, next: NextFunction) => {
     const token = req.headers['authorization']?.split(' ')[1];

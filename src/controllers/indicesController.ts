@@ -1,8 +1,8 @@
 import {Request, Response} from 'express';
-import Index from '../models/indices';
-import logger from '../utils/logger';
-import {TypedRequest} from '../types/express';
-import {SetIndicesDataRequestBody} from '../types/requestBodies';
+import Index from '../models/indices.js';
+import logger from '../utils/logger.js';
+import {TypedRequest} from '../types/express.js';
+import {SetIndicesDataRequestBody} from '../types/requestBodies.js';
 
 const getIndicesData = async (req: Request, res: Response) => {
     const allowedIndices = ['NIFTY 50', 'NIFTY BANK'];

@@ -1,11 +1,11 @@
 import {Request, Response} from 'express';
 import {MongoError} from 'mongodb';
-import Preference from '../models/preference';
-import User from '../models/user';
-import {TypedRequest} from '../types/express';
-import {UpdatePreferencesBody} from '../types/requestBodies';
-import ErrorCodes from '../types/errors';
-import logger from '../utils/logger';
+import Preference from '../models/preference.js';
+import User from '../models/user.js';
+import {TypedRequest} from '../types/express.js';
+import {UpdatePreferencesBody} from '../types/requestBodies.js';
+import ErrorCodes from '../types/errors.js';
+import logger from '../utils/logger.js';
 
 const getUser = async (req: Request, res: Response) => {
     const username = req.user;

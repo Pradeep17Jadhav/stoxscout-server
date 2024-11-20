@@ -59,7 +59,7 @@ const login = async (req: Request, res: Response): Promise<Response> => {
         const {username, password} = req.body;
         const user = await User.findOne({username});
         if (user && (await bcrypt.compare(password, user.password))) {
-            const token = jwt.sign({username: user.username}, process.env.JWT_SECRET, {expiresIn: '1d'});
+            const token = jwt.sign({username: user.username}, process.env.JWT_SECRET, {expiresIn: '30d'});
             await Session.findOneAndUpdate({username}, {lastActivity: Date.now()}, {upsert: true, new: true});
             return res.status(200).json({token});
         } else {

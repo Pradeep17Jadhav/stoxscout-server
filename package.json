@@ -1,13 +1,14 @@
 {
-  "name": "server",
+  "name": "stoxscout-server",
   "version": "1.0.0",
   "description": "",
-  "main": "./src/index.js",
+  "main": "./public/index.js",
   "type": "module",
   "scripts": {
-    "build": "tsc",
-    "start": "node ./public/index.js",
-    "dev": "nodemon ./public/index.js"
+    "build": "cross-env NODE_ENV=production node esbuild.js",
+    "build:dev": "tsc",
+    "start": "cross-env NODE_ENV=production node ./public/bundle.min.js",
+    "dev": "cross-env NODE_ENV=development nodemon ./public/index.js"
   },
   "keywords": [],
   "author": "",
@@ -17,6 +18,7 @@
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.3",
     "cors": "^2.8.5",
+    "cross-env": "^7.0.3",
     "crypto": "^1.0.1",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
@@ -25,7 +27,6 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.7.3",
     "node-cron": "^3.0.3",
-    "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "winston": "^3.17.0"
   },
@@ -39,6 +40,7 @@
     "@types/node-cron": "^3.0.11",
     "@typescript-eslint/eslint-plugin": "^8.14.0",
     "@typescript-eslint/parser": "^8.14.0",
+    "esbuild": "^0.24.0",
     "eslint": "^9.14.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",

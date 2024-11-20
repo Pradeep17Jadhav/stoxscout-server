@@ -10,6 +10,7 @@
         "resolveJsonModule": true,
         "skipLibCheck": true,
         "baseUrl": ".",
+        "noEmitOnError": true,
         "paths": {
             "@src/*": ["src/*"]
         },

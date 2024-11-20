@@ -2,7 +2,7 @@
     "version": 2,
     "builds": [
         {
-            "src": "public/index.js",
+            "src": "public/bundle.min.js",
             "use": "@vercel/node",
             "config": {
                 "includeFiles": [
@@ -14,7 +14,7 @@
     "rewrites": [
         {
             "source": "/(.*)",
-            "destination": "public/index.js"
+            "destination": "public/bundle.min.js"
         }
     ]
 }

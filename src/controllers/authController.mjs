@@ -31,7 +31,7 @@ const register = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new User({username, password: hashedPassword, email, name});
         await newUser.save();
-        const token = jwt.sign({username}, process.env.JWT_SECRET, {expiresIn: '1d'});
+        const token = jwt.sign({username}, process.env.JWT_SECRET, {expiresIn: '30d'});
         await Session.findOneAndUpdate({username}, {lastActivity: Date.now()}, {upsert: true, new: true});
         res.status(201).json({token, success: true});
     } catch (err) {

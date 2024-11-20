@@ -5,7 +5,7 @@ const TransactionSchema = new mongoose.Schema(
         dateAdded: {
             type: Date,
             required: true,
-            get: (v) => new Date(v)
+            get: (v: Date) => new Date(v)
         },
         quantity: {
             type: Number,
@@ -58,7 +58,7 @@ const HoldingSchema = new mongoose.Schema({
 });
 
 HoldingSchema.pre('save', function (next) {
-    this.updatedAt = Date.now();
+    this.updatedAt = new Date();
     next();
 });
 

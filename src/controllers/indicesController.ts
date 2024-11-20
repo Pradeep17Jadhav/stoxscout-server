@@ -1,6 +1,10 @@
-import Index from '../models/indices.mjs';
+import {Request, Response} from 'express';
+import Index from '../models/indices';
+import logger from '../utils/logger';
+import {TypedRequest} from '../types/express';
+import {SetIndicesDataRequestBody} from '../types/requestBodies';
 
-const getIndicesData = async (req, res) => {
+const getIndicesData = async (req: Request, res: Response) => {
     const allowedIndices = ['NIFTY 50', 'NIFTY BANK'];
     try {
         const filteredIndices = await Index.find({
@@ -11,11 +15,13 @@ const getIndicesData = async (req, res) => {
 
         res.status(200).json(filteredIndices);
     } catch (error) {
-        res.status(500).json({error: error.message});
+        if (error instanceof Error) {
+            res.status(500).json({error: error.message});
+        }
     }
 };
 
-const setIndicesData = async (req, res) => {
+const setIndicesData = async (req: TypedRequest<SetIndicesDataRequestBody>, res: Response) => {
     const newFetchedParsed = req.body;
     try {
         await Promise.all(
@@ -37,7 +43,12 @@ const setIndicesData = async (req, res) => {
 
         res.status(200).json({message: 'Indices data saved successfully!'});
     } catch (err) {
-        return res.status(500).json({message: 'Error saving indices data', error: err.message});
+        let errorMessage = 'Error saving indices data';
+        if (err instanceof Error) {
+            errorMessage += err.message;
+        }
+        logger.error(errorMessage);
+        return res.status(500).json({message: 'Error saving indices data'});
     }
 };
 

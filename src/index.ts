@@ -3,15 +3,16 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import {signupValidation} from './validators/signupValidation.mjs';
-import {authenticateToken} from './middlewares/authMiddleware.mjs';
-import {validateSession} from './middlewares/sessionMiddleware.mjs';
-import {getIndicesData, setIndicesData} from './controllers/indicesController.mjs';
-import {getMarketData, setMarketData} from './controllers/marketDataController.mjs';
-import {getHoldings, getUserHoldingsList, addHolding, uploadHoldings} from './controllers/holdingsController.mjs';
-import {getPreferences, updatePreferences, getUser} from './controllers/userController.mjs';
-import {login, logout, register} from './controllers/authController.mjs';
-import './cron/sessionCleanup.mjs';
+import {authenticateToken} from './middlewares/authMiddleware';
+import {signupValidation} from './validators/signupValidation';
+import {validateSession} from './middlewares/sessionMiddleware';
+import {getIndicesData, setIndicesData} from './controllers/indicesController';
+import {getMarketData, setMarketData} from './controllers/marketDataController';
+import {getHoldings, getUserHoldingsList, addHolding, uploadHoldings} from './controllers/holdingsController';
+import {getPreferences, updatePreferences, getUser} from './controllers/userController';
+import {login, logout, register} from './controllers/authController';
+import logger from './utils/logger';
+import './cron/sessionCleanup';
 dotenv.config();
 
 const app = express();
@@ -20,12 +21,16 @@ app.use(bodyParser.json());
 
 const PORT = process.env.PORT || 4000;
 
-mongoose
-    .connect(process.env.MONGODB_URI)
-    .then(() => {
-        console.log('MongoDB connected');
-    })
-    .catch((err) => console.log(err));
+if (process.env.MONGODB_URI) {
+    mongoose
+        .connect(process.env.MONGODB_URI)
+        .then(() => {
+            logger.info('MongoDB connected');
+        })
+        .catch((err) => logger.log(err));
+} else {
+    logger.info('MONGODB_URI not defined in env');
+}
 
 app.get('/userHoldingsList', getUserHoldingsList);
 
@@ -49,5 +54,5 @@ app.put('/api/preference', authenticateToken, validateSession, updatePreferences
 app.get('/api/user', authenticateToken, validateSession, getUser);
 
 app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+    logger.info(`Server is running on http://localhost:${PORT}`);
 });

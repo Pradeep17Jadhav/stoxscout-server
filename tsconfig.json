@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+        "target": "es2022",
+        "module": "ES2022", // Use ES modules
+        "moduleResolution": "node", // Resolving modules in a Node-like manner
+        "esModuleInterop": true, // For compatibility with CommonJS
+        "strict": true, // Enables all strict type checking options
+        "outDir": "./dist", // Where to place the compiled files
+        "rootDir": "./src",
+        "resolveJsonModule": true, // If you need to import .json files
+        "skipLibCheck": true, // Skip checking of declaration files
+        "baseUrl": ".",
+        "paths": {
+            "@src/*": ["src/*"]
+        },
+        "lib": ["es2020"]
+    },
+    "include": ["src/**/*.ts", "src/**/*.d.ts", "global.d.ts"],
+    "exclude": [
+        "node_modules" // Exclude node_modules from being compiled
+    ]
+}

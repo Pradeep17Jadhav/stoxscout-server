@@ -45,7 +45,7 @@ const MarketDataSchema = new mongoose.Schema({
 });
 
 MarketDataSchema.pre('save', function (next) {
-    this.updatedAt = Date.now();
+    this.updatedAt = new Date();
     next();
 });
 

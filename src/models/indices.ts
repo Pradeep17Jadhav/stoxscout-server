@@ -25,7 +25,7 @@ const IndexSchema = new mongoose.Schema({
 });
 
 IndexSchema.pre('save', function (next) {
-    this.updatedAt = Date.now();
+    this.updatedAt = new Date();
     next();
 });
 

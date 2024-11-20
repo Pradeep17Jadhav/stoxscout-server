@@ -50,7 +50,7 @@ const PreferenceSchema = new mongoose.Schema({
 });
 
 PreferenceSchema.pre('save', function (next) {
-    this.updatedAt = Date.now();
+    this.updatedAt = new Date();
     next();
 });
 

@@ -1,6 +1,10 @@
-import MarketData from '../models/marketData.mjs';
+import {Request, Response} from 'express';
+import MarketData from '../models/marketData';
+import {TypedRequest} from '../types/express';
+import {MarketItem} from '../types/marketTypes';
+import {SetMarketDataRequestBody} from '../types/requestBodies';
 
-const setMarketData = async (req, res) => {
+const setMarketData = async (req: TypedRequest<SetMarketDataRequestBody>, res: Response) => {
     const newMarketData = req.body;
     try {
         await Promise.all(
@@ -30,7 +34,7 @@ const setMarketData = async (req, res) => {
     }
 };
 
-const setMarketDataInternally = async (marketData) => {
+const setMarketDataInternally = async (marketData: MarketItem[]) => {
     try {
         await Promise.all(
             marketData.map(async (data) => {
@@ -54,12 +58,12 @@ const setMarketDataInternally = async (marketData) => {
             })
         );
         return true;
-    } catch (err) {
+    } catch {
         return false;
     }
 };
 
-const getMarketData = async (req, res) => {
+const getMarketData = async (req: Request, res: Response) => {
     try {
         const marketData = await MarketData.find({}).lean().select('-_id -__v -createdAt -updatedAt');
         res.status(200).json(marketData);

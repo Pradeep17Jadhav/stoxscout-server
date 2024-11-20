@@ -1,6 +1,8 @@
-import Holding from '../models/holding.mjs';
+import {Request, Response} from 'express';
+import Holding from '../models/holding';
+import logger from '../utils/logger';
 
-const getHoldings = async (req, res) => {
+const getHoldings = async (req: Request, res: Response) => {
     try {
         const holdingsData = await Holding.find({userId: req.user})
             .lean()
@@ -21,12 +23,12 @@ const getHoldings = async (req, res) => {
 
         res.json(convertedHoldingsData);
     } catch (error) {
-        console.error(error);
+        logger.error(error);
         res.status(500).json({message: 'Server error while fetching holdings', error});
     }
 };
 
-const getUserHoldingsList = async (req, res) => {
+const getUserHoldingsList = async (req: Request, res: Response): Promise<Response> => {
     try {
         const holdingsData = await Holding.distinct('symbol');
         if (!holdingsData || holdingsData.length === 0) {
@@ -35,13 +37,13 @@ const getUserHoldingsList = async (req, res) => {
         const holdingsList = {
             nse: holdingsData
         };
-        res.json(holdingsList);
+        return res.json(holdingsList);
     } catch (error) {
-        res.status(500).json(error);
+        return res.status(500).json(error);
     }
 };
 
-const addHolding = async (req, res) => {
+const addHolding = async (req: Request, res: Response) => {
     const {symbol, dateAdded, quantity, avgPrice, exchange = 'NSE', isGift = false, isIPO = false} = req.body;
     try {
         const newTransaction = {
@@ -65,12 +67,12 @@ const addHolding = async (req, res) => {
         await holding.save();
         res.status(200).send({message: `Holding ${symbol} added successfully!`});
     } catch (err) {
-        console.error(err);
+        logger.error(err);
         res.status(500).send(`Server error while adding holding, ${err}`);
     }
 };
 
-const uploadHoldings = async (req, res) => {
+const uploadHoldings = async (req: Request, res: Response) => {
     const holdings = req.body;
 
     if (!Array.isArray(holdings) || holdings.length === 0) {
@@ -108,7 +110,7 @@ const uploadHoldings = async (req, res) => {
             message: `Holdings uploaded successfully! Inserted: ${result.upsertedCount}, Modified: ${result.modifiedCount}`
         });
     } catch (err) {
-        console.error(err);
+        logger.error(err);
         res.status(500).send(`Server error while uploading holdings, ${err}`);
     }
 };

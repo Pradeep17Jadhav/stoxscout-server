@@ -1,18 +1,27 @@
+import {Request, Response} from 'express';
 import {validationResult} from 'express-validator';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import User from '../models/user.mjs';
-import {blacklistToken} from '../middlewares/authMiddleware.mjs';
-import Session from '../models/session.mjs';
+import {MongoError} from 'mongodb';
+import User from '../models/user';
+import {blacklistToken} from '../middlewares/authMiddleware';
+import Session from '../models/session.js';
+import {TypedRequest} from '../types/express';
+import {RegisterRequestBody} from '../types/requestBodies';
+import logger from '../utils/logger';
+import ErrorCodes from '../types/errors';
 
-const register = async (req, res) => {
+const register = async (req: TypedRequest<RegisterRequestBody>, res: Response) => {
     const {username, password, email, name} = req.body;
-    const errors = validationResult(req);
+    const valResult = validationResult(req);
 
-    if (!errors.isEmpty()) {
-        const formattedErrors = errors.errors.flatMap((err) => {
+    if (!process.env.JWT_SECRET) {
+        return res.status(500).json({error: true, type: 'server_error', code: ErrorCodes.ENV_VARIABLE_NOT_DEFINED});
+    }
+    if (!valResult.isEmpty()) {
+        const formattedErrors = valResult.array().flatMap((err) => {
             if (err.msg.includes(',')) {
-                return err.msg.split(',').map((type) => ({type}));
+                return err.msg.split(',').map((type: string) => ({type}));
             }
             return [{type: err.msg}];
         });
@@ -31,41 +40,49 @@ const register = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new User({username, password: hashedPassword, email, name});
         await newUser.save();
-        const token = jwt.sign({username}, process.env.JWT_SECRET, {expiresIn: '30d'});
+        const token = jwt.sign({username}, process.env.JWT_SECRET, {expiresIn: '1d'});
         await Session.findOneAndUpdate({username}, {lastActivity: Date.now()}, {upsert: true, new: true});
         res.status(201).json({token, success: true});
     } catch (err) {
-        if (err.code === 11000) {
+        if (err instanceof MongoError && err.code === 11000) {
             return res.status(409).json({error: true});
         }
         res.status(500).json({error: true});
     }
 };
 
-const login = async (req, res) => {
+const login = async (req: Request, res: Response): Promise<Response> => {
+    if (!process.env.JWT_SECRET) {
+        return res.status(500).json({error: true, type: 'server_error', code: ErrorCodes.ENV_VARIABLE_NOT_DEFINED});
+    }
     try {
         const {username, password} = req.body;
         const user = await User.findOne({username});
         if (user && (await bcrypt.compare(password, user.password))) {
             const token = jwt.sign({username: user.username}, process.env.JWT_SECRET, {expiresIn: '1d'});
             await Session.findOneAndUpdate({username}, {lastActivity: Date.now()}, {upsert: true, new: true});
-            res.status(200).json({token});
+            return res.status(200).json({token});
         } else {
             return res.status(401).json({error: true, type: 'invalid_credentials'});
         }
     } catch (error) {
-        console.error(error);
+        logger.error(error);
         return res.status(500).send('Server error');
     }
 };
 
-const logout = async (req, res) => {
+const logout = async (req: Request, res: Response) => {
     try {
         const token = req.headers['authorization']?.split(' ')[1];
         await blacklistToken(token);
         return res.sendStatus(204);
     } catch (err) {
-        return res.sendStatus(401);
+        let errorMessage = 'Server error';
+        if (err instanceof Error) {
+            errorMessage += err.message;
+        }
+        logger.error(errorMessage);
+        return res.sendStatus(401).json({error: true, type: 'server_error', code: ErrorCodes.INTERNAL_SERVER_ERROR});
     }
 };
 

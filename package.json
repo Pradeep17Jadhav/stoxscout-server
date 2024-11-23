@@ -14,8 +14,8 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged",
-      "pre-push": "npm run build && git add public/bundle.min.js"
+      "pre-commit": "echo 'Running PreCommit' &&  lint-staged",
+      "pre-push": "echo 'Running PrePush' && npm run build && git add public/bundle.min.js"
     }
   },
   "lint-staged": {

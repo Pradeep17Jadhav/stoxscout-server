@@ -61,6 +61,9 @@ const login = async (req: Request, res: Response): Promise<Response> => {
         if (user && (await bcrypt.compare(password, user.password))) {
             const token = jwt.sign({username: user.username}, process.env.JWT_SECRET, {expiresIn: '30d'});
             await Session.findOneAndUpdate({username}, {lastActivity: Date.now()}, {upsert: true, new: true});
+            user.lastActivity = new Date();
+            user.lastLogin = new Date();
+            await user.save();
             return res.status(200).json({token});
         } else {
             return res.status(401).json({error: true, type: 'invalid_credentials'});

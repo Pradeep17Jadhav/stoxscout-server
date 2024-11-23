@@ -34,6 +34,10 @@ const PreferenceSchema = new mongoose.Schema({
     computer: {
         type: DevicePreferencesSchema
     },
+    theme: {
+        type: Number,
+        required: false
+    },
     userId: {
         type: String,
         required: true,

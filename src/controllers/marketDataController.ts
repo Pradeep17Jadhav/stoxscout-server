@@ -65,8 +65,11 @@ const setMarketDataInternally = async (marketData: MarketItem[]) => {
 
 const getMarketData = async (req: Request, res: Response) => {
     try {
-        const marketData = await MarketData.find({}).lean().select('-_id -__v -createdAt -updatedAt');
-        res.status(200).json(marketData);
+        const marketData = await MarketData.find({}).lean().select('-_id -__v -createdAt');
+        const oldestRecord = marketData.reduce((earliest, current) => {
+            return new Date(current.updatedAt) < new Date(earliest.updatedAt) ? current : earliest;
+        });
+        res.status(200).json({market: marketData, updatedAt: oldestRecord.updatedAt});
     } catch (error) {
         res.status(500).json({message: 'Error retrieving market data', error});
     }

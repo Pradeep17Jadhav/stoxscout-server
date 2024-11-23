@@ -130,5 +130,11 @@ dist
 # custom
 /data
 .vercel
-public
-!public/bundle.min.js
+public/controllers/
+public/cron/
+public/models/
+public/types/
+public/middlewares/
+public/utils/
+public/index.js
+public/validators/

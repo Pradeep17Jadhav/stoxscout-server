@@ -1,9 +1,16 @@
 import {Request, Response} from 'express';
 import Holding from '../models/holding.js';
+import User from '../models/user.js';
 import logger from '../utils/logger.js';
 
 const getHoldings = async (req: Request, res: Response) => {
     try {
+        const user = await User.findOne({username: req.user});
+        if (!user) {
+            return res.status(500).json({error: true, message: 'Server error'});
+        }
+        user.lastActivity = new Date();
+        await user.save();
         const holdingsData = await Holding.find({userId: req.user})
             .lean()
             .select('-_id -__v -createdAt -updatedAt -userId');

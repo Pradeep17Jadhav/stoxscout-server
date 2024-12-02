@@ -33,3 +33,9 @@ export const COLUMNS = {
     [DEFAULT_COLUMNS.DAY_PNL_PERCENT_INV]: 'DAY P&L % INV',
     [DEFAULT_COLUMNS.MAX_DAYS]: 'MAX DAYS'
 };
+
+export type PENDING_OTP = {
+    email: string;
+    otp: number;
+    expires: Date;
+};

@@ -9,6 +9,11 @@ export type RegisterRequestBody = {
     name: string;
 };
 
+export type VerifyOtpRequestBody = {
+    email: string;
+    otp: number;
+};
+
 export type SetMarketDataRequestBody = MarketItem[];
 export type SetIndicesDataRequestBody = IndexItem[];
 export type UpdatePreferencesBody = Preferences;

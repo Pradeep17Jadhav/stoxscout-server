@@ -7,9 +7,21 @@ import User from '../models/user.js';
 import {blacklistToken} from '../middlewares/authMiddleware.js';
 import Session from '../models/session.js';
 import {TypedRequest} from '../types/express.js';
-import {RegisterRequestBody} from '../types/requestBodies.js';
+import {RegisterRequestBody, VerifyOtpRequestBody} from '../types/requestBodies.js';
 import logger from '../utils/logger.js';
 import ErrorCodes from '../types/errors.js';
+import {sendMail} from '../utils/email.js';
+import {PENDING_OTP} from '../types/common.js';
+
+let pendingOtp: PENDING_OTP[] = [];
+
+setInterval(
+    () => {
+        const now = new Date();
+        pendingOtp = pendingOtp.filter((entry) => entry.expires > now);
+    },
+    60 * 60 * 1000
+);
 
 const register = async (req: TypedRequest<RegisterRequestBody>, res: Response) => {
     const {username, password, email, name} = req.body;
@@ -89,4 +101,53 @@ const logout = async (req: Request, res: Response) => {
     }
 };
 
-export {login, logout, register};
+const forgotPassword = async (req: Request, res: Response) => {
+    const {email} = req.body;
+    const otp = Math.floor(100000 + Math.random() * 900000);
+    const subject = 'Your Password Reset Request';
+    const body = `Use OTP ${otp} to update your login credentials at MagnyFire! The OTP expires in 15 minutes.`;
+    try {
+        await sendMail(email, subject, body);
+        const expires = new Date(Date.now() + 15 * 60 * 1000);
+        pendingOtp.push({email, otp, expires});
+        return res.status(200).json({success: true});
+    } catch {
+        return res.status(500).json({success: false, message: 'cannot_send_otp'});
+    }
+};
+
+const verifyOtp = async (req: TypedRequest<VerifyOtpRequestBody>, res: Response) => {
+    const {email, otp} = req.body;
+    const otpEntryIndex = pendingOtp.findIndex((entry) => entry.email === email && entry.otp === otp);
+    if (otpEntryIndex === -1) {
+        return res.status(400).json({success: false, message: 'incorrect_otp'});
+    }
+    pendingOtp.splice(otpEntryIndex, 1);
+    if (!process.env.JWT_SECRET) {
+        return res.status(500).json({error: true, type: 'server_error'});
+    }
+    const resetToken = jwt.sign({email}, process.env.JWT_SECRET, {expiresIn: '15m'});
+    return res.status(200).json({success: true, resetToken});
+};
+
+const updatePassword = async (req: TypedRequest<{resetToken: string; newPassword: string}>, res: Response) => {
+    const {resetToken, newPassword} = req.body;
+    if (!process.env.JWT_SECRET) {
+        return res.status(500).json({error: true, type: 'server_error'});
+    }
+    try {
+        const payload = jwt.verify(resetToken, process.env.JWT_SECRET) as {email: string};
+        const {email} = payload;
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        const user = await User.findOneAndUpdate({email}, {password: hashedPassword});
+        if (!user) {
+            return res.status(404).json({success: false, message: 'user_not_found'});
+        }
+        return res.status(200).json({success: true, message: 'password_updated'});
+    } catch {
+        return res.status(400).json({success: false, message: 'invalid_or_expired_token'});
+    }
+};
+
+export {login, logout, register, forgotPassword, verifyOtp, updatePassword};

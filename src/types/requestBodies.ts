@@ -14,6 +14,11 @@ export type VerifyOtpRequestBody = {
     otp: number;
 };
 
+export type MultiplyStockQuantityRequestBody = {
+    symbol: string;
+    multiplier: number;
+};
+
 export type SetMarketDataRequestBody = MarketItem[];
 export type SetIndicesDataRequestBody = IndexItem[];
 export type UpdatePreferencesBody = Preferences;

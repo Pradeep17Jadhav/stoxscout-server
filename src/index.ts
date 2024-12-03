@@ -11,6 +11,7 @@ import {getIndicesData, setIndicesData} from './controllers/indicesController.js
 import {getMarketData, setMarketData} from './controllers/marketDataController.js';
 import {getHoldings, getUserHoldingsList, addHolding, uploadHoldings} from './controllers/holdingsController.js';
 import {getPreferences, updatePreferences, getUser} from './controllers/userController.js';
+import {multiplyStockQuantity} from './controllers/stockSplitController.js';
 import {forgotPassword, login, logout, register, updatePassword, verifyOtp} from './controllers/authController.js';
 import logger from './utils/logger.js';
 import {setupEmailServer} from './utils/email.js';
@@ -56,6 +57,7 @@ app.get('/api/user', authenticateToken, validateSession, getUser);
 app.post('/api/forgotPassword', forgotPassword);
 app.post('/api/verifyOtp', verifyOtp);
 app.post('/api/updatePassword', updatePassword);
+app.post('/api/multiplyQuantity', multiplyStockQuantity);
 
 app.listen(PORT, () => {
     logger.info(`Server is running on http://localhost:${PORT}`);

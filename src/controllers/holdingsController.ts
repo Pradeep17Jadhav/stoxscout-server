@@ -35,7 +35,7 @@ const getHoldings = async (req: Request, res: Response) => {
     }
 };
 
-const getUserHoldingsList = async (req: Request, res: Response): Promise<Response> => {
+const getFullHoldingsList = async (req: Request, res: Response): Promise<Response> => {
     try {
         const holdingsData = await Holding.distinct('symbol');
         if (!holdingsData || holdingsData.length === 0) {
@@ -122,4 +122,4 @@ const uploadHoldings = async (req: Request, res: Response) => {
     }
 };
 
-export {getHoldings, getUserHoldingsList, addHolding, uploadHoldings};
+export {getHoldings, getFullHoldingsList, addHolding, uploadHoldings};

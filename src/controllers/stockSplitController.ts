@@ -8,8 +8,7 @@ const updateTransactionQuantities = async (symbol: string, multiplier: number): 
     if (!symbol || multiplier <= 0) {
         throw new Error('Invalid symbol or multiplier');
     }
-    await mongoose.connection.collection('holdings').updateMany(
-        {symbol},
+    await mongoose.connection.collection('holdings').updateMany({symbol}, [
         {
             $set: {
                 transactions: {
@@ -17,18 +16,18 @@ const updateTransactionQuantities = async (symbol: string, multiplier: number): 
                         input: '$transactions',
                         as: 'transaction',
                         in: {
-                            $mergeObjects: [
-                                '$$transaction',
-                                {
-                                    quantity: {$multiply: ['$$transaction.quantity', multiplier]}
-                                }
-                            ]
+                            dateAdded: '$$transaction.dateAdded',
+                            quantity: {$multiply: ['$$transaction.quantity', multiplier]},
+                            avgPrice: {$divide: ['$$transaction.avgPrice', multiplier]},
+                            exchange: '$$transaction.exchange',
+                            isGift: '$$transaction.isGift',
+                            isIPO: '$$transaction.isIPO'
                         }
                     }
                 }
             }
         }
-    );
+    ]);
     logger.info(`Successfully updated holdings of symbol ${symbol} with multiplier ${multiplier}`);
 };
 

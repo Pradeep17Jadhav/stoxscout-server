@@ -126,10 +126,10 @@ const verifyOtp = async (req: TypedRequest<VerifyOtpRequestBody>, res: Response)
     if (otpEntryIndex === -1) {
         return res.status(400).json({success: false, message: 'incorrect_otp'});
     }
-    pendingOtp.splice(otpEntryIndex, 1);
     if (!process.env.JWT_SECRET) {
         return res.status(500).json({error: true, type: 'server_error'});
     }
+    pendingOtp.splice(otpEntryIndex, 1);
     const resetToken = jwt.sign({email}, process.env.JWT_SECRET, {expiresIn: '15m'});
     return res.status(200).json({success: true, resetToken});
 };

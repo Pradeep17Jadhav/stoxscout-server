@@ -11,9 +11,7 @@ const getHoldings = async (req: Request, res: Response) => {
         }
         user.lastActivity = new Date();
         await user.save();
-        const holdingsData = await Holding.find({userId: req.user})
-            .lean()
-            .select('-_id -__v -createdAt -updatedAt -userId');
+        const holdingsData = await Holding.find({userId: req.user}).lean().select('-__v -createdAt -updatedAt -userId');
         if (!holdingsData) {
             return res.status(404).json({message: 'No holdings found for this user.'});
         }

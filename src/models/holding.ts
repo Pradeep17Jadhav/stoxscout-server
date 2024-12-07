@@ -1,36 +1,33 @@
 import mongoose from 'mongoose';
 
-const TransactionSchema = new mongoose.Schema(
-    {
-        dateAdded: {
-            type: Date,
-            required: true,
-            get: (v: Date) => new Date(v)
-        },
-        quantity: {
-            type: Number,
-            required: true
-        },
-        avgPrice: {
-            type: Number,
-            required: true
-        },
-        exchange: {
-            type: String,
-            required: true,
-            trim: true
-        },
-        isGift: {
-            type: Boolean,
-            required: false
-        },
-        isIPO: {
-            type: Boolean,
-            required: false
-        }
+const TransactionSchema = new mongoose.Schema({
+    dateAdded: {
+        type: Date,
+        required: true,
+        get: (v: Date) => new Date(v)
     },
-    {_id: false}
-);
+    quantity: {
+        type: Number,
+        required: true
+    },
+    avgPrice: {
+        type: Number,
+        required: true
+    },
+    exchange: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    isGift: {
+        type: Boolean,
+        required: false
+    },
+    isIPO: {
+        type: Boolean,
+        required: false
+    }
+});
 
 const HoldingSchema = new mongoose.Schema({
     symbol: {

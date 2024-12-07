@@ -122,9 +122,11 @@ const uploadHoldings = async (req: Request, res: Response) => {
         res.status(500).send(`Server error while uploading holdings, ${err}`);
     }
 };
-
 const editHolding = async (req: Request, res: Response) => {
     const {symbol, updatedTransactions}: EditHoldingRequestBody = req.body;
+    if (!symbol || !updatedTransactions) {
+        return res.status(500).json({error: true, message: 'incorrect_payload'});
+    }
     const userId = req.user;
     let updatedCount = 0;
     let deletedCount = 0;
@@ -154,9 +156,26 @@ const editHolding = async (req: Request, res: Response) => {
                 updatedCount += 1;
             }
         }
+
+        if (holding.transactions.length === 0) {
+            await holding.deleteOne();
+            return res.status(200).json({
+                error: false,
+                message: 'holding_deleted',
+                deletedCount,
+                updatedCount
+            });
+        }
+
         holding.updatedAt = new Date();
         await holding.save();
-        res.status(200).json({error: false, message: 'holding_updated', deletedCount, updatedCount});
+
+        res.status(200).json({
+            error: false,
+            message: 'holding_updated',
+            deletedCount,
+            updatedCount
+        });
     } catch (err) {
         console.error(err);
         res.status(500).json({error: true});

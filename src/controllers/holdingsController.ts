@@ -156,7 +156,7 @@ const editHolding = async (req: Request, res: Response) => {
         }
         holding.updatedAt = new Date();
         await holding.save();
-        res.status(200).json({error: false, message: 'holding_updated', deleted: deletedCount, updated: updatedCount});
+        res.status(200).json({error: false, message: 'holding_updated', deletedCount, updatedCount});
     } catch (err) {
         console.error(err);
         res.status(500).json({error: true});

@@ -2,6 +2,7 @@ import {Request, Response} from 'express';
 import Holding from '../models/holding.js';
 import User from '../models/user.js';
 import logger from '../utils/logger.js';
+import {EditHoldingRequestBody} from '@src/types/requestBodies.js';
 
 const getHoldings = async (req: Request, res: Response) => {
     try {
@@ -11,7 +12,9 @@ const getHoldings = async (req: Request, res: Response) => {
         }
         user.lastActivity = new Date();
         await user.save();
-        const holdingsData = await Holding.find({userId: req.user}).lean().select('-__v -createdAt -updatedAt -userId');
+        const holdingsData = await Holding.find({userId: req.user})
+            .lean()
+            .select('-_id -__v -createdAt -updatedAt -userId');
         if (!holdingsData) {
             return res.status(404).json({message: 'No holdings found for this user.'});
         }
@@ -120,4 +123,44 @@ const uploadHoldings = async (req: Request, res: Response) => {
     }
 };
 
-export {getHoldings, getFullHoldingsList, addHolding, uploadHoldings};
+const editHolding = async (req: Request, res: Response) => {
+    const {symbol, updatedTransactions}: EditHoldingRequestBody = req.body;
+    const userId = req.user;
+    let updatedCount = 0;
+    let deletedCount = 0;
+
+    try {
+        const holding = await Holding.findOne({symbol, userId});
+        if (!holding) {
+            return res.status(404).json({error: true, message: 'holding_not_found'});
+        }
+        for (const {transaction, deleted} of updatedTransactions) {
+            const transactionIndex = holding.transactions.findIndex((t) => t._id.toString() === transaction._id);
+            if (transactionIndex === -1) {
+                continue;
+            }
+            if (deleted) {
+                holding.transactions.splice(transactionIndex, 1);
+                deletedCount += 1;
+            } else {
+                holding.transactions[transactionIndex].set({
+                    dateAdded: new Date(transaction.dateAdded),
+                    quantity: transaction.quantity,
+                    avgPrice: transaction.avgPrice,
+                    exchange: transaction.exchange,
+                    isGift: transaction.isGift,
+                    isIPO: transaction.isIPO
+                });
+                updatedCount += 1;
+            }
+        }
+        holding.updatedAt = new Date();
+        await holding.save();
+        res.status(200).json({error: false, message: 'holding_updated', deleted: deletedCount, updated: updatedCount});
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({error: true});
+    }
+};
+
+export {getHoldings, getFullHoldingsList, addHolding, uploadHoldings, editHolding};

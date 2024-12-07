@@ -9,7 +9,13 @@ import {signupValidation} from './validators/signupValidation.js';
 import {validateSession} from './middlewares/sessionMiddleware.js';
 import {getIndicesData, setIndicesData} from './controllers/indicesController.js';
 import {getMarketData, setMarketData} from './controllers/marketDataController.js';
-import {getHoldings, getFullHoldingsList, addHolding, uploadHoldings} from './controllers/holdingsController.js';
+import {
+    getHoldings,
+    getFullHoldingsList,
+    addHolding,
+    uploadHoldings,
+    editHolding
+} from './controllers/holdingsController.js';
 import {getPreferences, updatePreferences, getUser} from './controllers/userController.js';
 import {multiplyStockQuantity} from './controllers/stockSplitController.js';
 import {forgotPassword, login, logout, register, updatePassword, verifyOtp} from './controllers/authController.js';
@@ -38,6 +44,7 @@ app.get('/userHoldingsList', getFullHoldingsList);
 
 app.get('/api/holdings', authenticateToken, validateSession, getHoldings);
 app.post('/api/holdings', authenticateToken, validateSession, addHolding);
+app.post('/api/editHolding', authenticateToken, validateSession, editHolding);
 app.post('/api/upload', authenticateToken, validateSession, uploadHoldings);
 
 app.post('/api/indices', setIndicesData);

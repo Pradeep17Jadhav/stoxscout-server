@@ -1,3 +1,4 @@
+import {EditableTransaction} from './holdingTypes.js';
 import {IndexItem} from './indicesTypes.js';
 import {MarketItem} from './marketTypes.js';
 import {Preferences} from './userPreferences.js';
@@ -17,6 +18,11 @@ export type VerifyOtpRequestBody = {
 export type MultiplyStockQuantityRequestBody = {
     symbol: string;
     multiplier: number;
+};
+
+export type EditHoldingRequestBody = {
+    symbol: string;
+    updatedTransactions: EditableTransaction[];
 };
 
 export type SetMarketDataRequestBody = MarketItem[];

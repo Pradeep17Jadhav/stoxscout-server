@@ -123,6 +123,9 @@ const forgotPassword = async (req: Request, res: Response) => {
 };
 
 const verifyOtp = async (req: TypedRequest<VerifyOtpRequestBody>, res: Response) => {
+    if (!process.env.JWT_SECRET) {
+        return res.status(500).json({error: true, type: 'server_error'});
+    }
     const {emailOrUsername, otp} = req.body;
     const isEmail = emailOrUsername.indexOf('@') !== -1 && emailOrUsername.indexOf('.') !== -1;
     const user = await User.findOne({...(isEmail ? {email: emailOrUsername} : {username: emailOrUsername})});
@@ -134,8 +137,10 @@ const verifyOtp = async (req: TypedRequest<VerifyOtpRequestBody>, res: Response)
     if (otpEntryIndex === -1) {
         return res.status(400).json({success: false, message: 'incorrect_otp'});
     }
-    if (!process.env.JWT_SECRET) {
-        return res.status(500).json({error: true, type: 'server_error'});
+    const otpEntry = pendingOtp[otpEntryIndex];
+    if (new Date() > otpEntry.expires) {
+        pendingOtp.splice(otpEntryIndex, 1);
+        return res.status(400).json({success: false, message: 'otp_expired'});
     }
     pendingOtp.splice(otpEntryIndex, 1);
     const resetToken = jwt.sign({email, updatedAt: user.updatedAt}, process.env.JWT_SECRET, {expiresIn: '15m'});
@@ -150,21 +155,33 @@ const updatePassword = async (req: TypedRequest<{resetToken: string; newPassword
     try {
         const {email, updatedAt} = jwt.verify(resetToken, process.env.JWT_SECRET) as {
             email: string;
-            updatedAt: NativeDate;
+            updatedAt: string;
         };
         const user = await User.findOne({email});
         if (!user) {
             return res.status(404).json({success: false, message: 'user_not_found'});
         }
-        if (user.updatedAt !== updatedAt) {
-            return res.status(500).json({success: false, message: 'reset_token_expired'});
+        if (user.updatedAt.toISOString() !== updatedAt) {
+            return res.status(400).json({success: false, message: 'reset_token_expired'});
         }
         const hashedPassword = await bcrypt.hash(newPassword, 10);
         user.password = hashedPassword;
         user.updatedAt = new Date();
         await user.save();
         return res.status(200).json({success: true, message: 'password_updated'});
-    } catch {
+    } catch (error) {
+        if (error instanceof Error) {
+            logger.error(error.message);
+            if (error.name === 'MongoError') {
+                return res.status(400).json({success: false, message: 'mongo_error'});
+            }
+            if (error.name === 'TokenExpiredError') {
+                return res.status(400).json({success: false, message: 'token_expired'});
+            }
+            if (error.name === 'JsonWebTokenError') {
+                return res.status(400).json({success: false, message: 'invalid_token'});
+            }
+        }
         return res.status(400).json({success: false, message: 'invalid_or_expired_token'});
     }
 };

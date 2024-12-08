@@ -123,7 +123,13 @@ const forgotPassword = async (req: Request, res: Response) => {
 };
 
 const verifyOtp = async (req: TypedRequest<VerifyOtpRequestBody>, res: Response) => {
-    const {email, otp} = req.body;
+    const {emailOrUsername, otp} = req.body;
+    const isEmail = emailOrUsername.indexOf('@') !== -1 && emailOrUsername.indexOf('.') !== -1;
+    const user = await User.findOne({...(isEmail ? {email: emailOrUsername} : {username: emailOrUsername})});
+    if (!user) {
+        return res.status(404).json({error: true, type: 'user_not_found'});
+    }
+    const email = user.email;
     const otpEntryIndex = pendingOtp.findIndex((entry) => entry.email === email && entry.otp === otp);
     if (otpEntryIndex === -1) {
         return res.status(400).json({success: false, message: 'incorrect_otp'});
@@ -132,7 +138,7 @@ const verifyOtp = async (req: TypedRequest<VerifyOtpRequestBody>, res: Response)
         return res.status(500).json({error: true, type: 'server_error'});
     }
     pendingOtp.splice(otpEntryIndex, 1);
-    const resetToken = jwt.sign({email}, process.env.JWT_SECRET, {expiresIn: '15m'});
+    const resetToken = jwt.sign({email, updatedAt: user.updatedAt}, process.env.JWT_SECRET, {expiresIn: '15m'});
     return res.status(200).json({success: true, resetToken});
 };
 
@@ -142,14 +148,21 @@ const updatePassword = async (req: TypedRequest<{resetToken: string; newPassword
         return res.status(500).json({error: true, type: 'server_error'});
     }
     try {
-        const payload = jwt.verify(resetToken, process.env.JWT_SECRET) as {email: string};
-        const {email} = payload;
-
-        const hashedPassword = await bcrypt.hash(newPassword, 10);
-        const user = await User.findOneAndUpdate({email}, {password: hashedPassword});
+        const {email, updatedAt} = jwt.verify(resetToken, process.env.JWT_SECRET) as {
+            email: string;
+            updatedAt: NativeDate;
+        };
+        const user = await User.findOne({email});
         if (!user) {
             return res.status(404).json({success: false, message: 'user_not_found'});
         }
+        if (user.updatedAt !== updatedAt) {
+            return res.status(500).json({success: false, message: 'reset_token_expired'});
+        }
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        user.password = hashedPassword;
+        user.updatedAt = new Date();
+        await user.save();
         return res.status(200).json({success: true, message: 'password_updated'});
     } catch {
         return res.status(400).json({success: false, message: 'invalid_or_expired_token'});

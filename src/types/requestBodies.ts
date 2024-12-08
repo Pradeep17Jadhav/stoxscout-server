@@ -11,7 +11,7 @@ export type RegisterRequestBody = {
 };
 
 export type VerifyOtpRequestBody = {
-    email: string;
+    emailOrUsername: string;
     otp: number;
 };
 

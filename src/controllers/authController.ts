@@ -102,11 +102,13 @@ const logout = async (req: Request, res: Response) => {
 };
 
 const forgotPassword = async (req: Request, res: Response) => {
-    const {email} = req.body;
-    const user = await User.findOne({email});
+    const {emailOrUsername} = req.body;
+    const isEmail = emailOrUsername.indexOf('@') !== -1 && emailOrUsername.indexOf('.') !== -1;
+    const user = await User.findOne({...(isEmail ? {email: emailOrUsername} : {username: emailOrUsername})});
     if (!user) {
         return res.status(404).json({error: true, type: 'user_not_found'});
     }
+    const email = user.email;
     const otp = Math.floor(100000 + Math.random() * 900000);
     const subject = 'Your Password Reset Request';
     const body = `Use OTP ${otp} to update your login credentials at MagnyFire! The OTP expires in 15 minutes.`;

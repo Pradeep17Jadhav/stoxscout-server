@@ -68,11 +68,16 @@ const login = async (req: Request, res: Response): Promise<Response> => {
         return res.status(500).json({error: true, type: 'server_error', code: ErrorCodes.ENV_VARIABLE_NOT_DEFINED});
     }
     try {
-        const {username, password} = req.body;
-        const user = await User.findOne({username});
+        const {emailOrUsername, password} = req.body;
+        const isEmail = emailOrUsername.indexOf('@') !== -1 && emailOrUsername.indexOf('.') !== -1;
+        const user = await User.findOne({...(isEmail ? {email: emailOrUsername} : {username: emailOrUsername})});
         if (user && (await bcrypt.compare(password, user.password))) {
             const token = jwt.sign({username: user.username}, process.env.JWT_SECRET, {expiresIn: '30d'});
-            await Session.findOneAndUpdate({username}, {lastActivity: Date.now()}, {upsert: true, new: true});
+            await Session.findOneAndUpdate(
+                {username: user.username},
+                {lastActivity: Date.now()},
+                {upsert: true, new: true}
+            );
             user.lastActivity = new Date();
             user.lastLogin = new Date();
             await user.save();

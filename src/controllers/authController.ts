@@ -12,6 +12,7 @@ import logger from '../utils/logger.js';
 import ErrorCodes from '../types/errors.js';
 import {sendMail} from '../utils/email.js';
 import {PENDING_OTP} from '../types/common.js';
+import {sendWelcomeEmail} from './helpers.js';
 
 let pendingOtp: PENDING_OTP[] = [];
 
@@ -54,6 +55,7 @@ const register = async (req: TypedRequest<RegisterRequestBody>, res: Response) =
         await newUser.save();
         const token = jwt.sign({username}, process.env.JWT_SECRET, {expiresIn: '1d'});
         await Session.findOneAndUpdate({username}, {lastActivity: Date.now()}, {upsert: true, new: true});
+        sendWelcomeEmail(name, email, username);
         res.status(201).json({token, success: true});
     } catch (err) {
         if (err instanceof MongoError && err.code === 11000) {

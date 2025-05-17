@@ -54,8 +54,8 @@ const register = async (req: TypedRequest<RegisterRequestBody>, res: Response) =
         const newUser = new User({username, password: hashedPassword, email, name});
         await newUser.save();
         const token = jwt.sign({username}, process.env.JWT_SECRET, {expiresIn: '1d'});
+        await sendWelcomeEmail(name, email, username);
         await Session.findOneAndUpdate({username}, {lastActivity: Date.now()}, {upsert: true, new: true});
-        sendWelcomeEmail(name, email, username);
         res.status(201).json({token, success: true});
     } catch (err) {
         if (err instanceof MongoError && err.code === 11000) {

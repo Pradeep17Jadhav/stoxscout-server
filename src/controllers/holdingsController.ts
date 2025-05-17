@@ -8,7 +8,7 @@ const getHoldings = async (req: Request, res: Response) => {
     try {
         const user = await User.findOne({username: req.user});
         if (!user) {
-            return res.status(500).json({error: true, message: 'Server error'});
+            return res.status(500).json({error: true, type: 'user_not_found'});
         }
         user.lastActivity = new Date();
         await user.save();
@@ -16,7 +16,7 @@ const getHoldings = async (req: Request, res: Response) => {
             .lean()
             .select('-_id -__v -createdAt -updatedAt -userId');
         if (!holdingsData) {
-            return res.status(404).json({message: 'No holdings found for this user.'});
+            return res.status(404).json({error: true, type: 'holdings_not_found'});
         }
         if (holdingsData.length === 0) {
             return res.status(200).json([]);
